@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using wimm.Confoundry.DontBelongs;
+using wimm.Confoundry.Exceptions;
 
 namespace wimm.Confoundry
 {
@@ -23,21 +24,21 @@ namespace wimm.Confoundry
         public T Value { get; }
 
         /// <summary>
-        /// Initializes a new <see cref="T:wimm.Confoundry.Configuration{T}"/>
+        /// Initializes a new <see cref="Configuration{T}"/>
         /// </summary>
         /// <param name="name">The name of the configuration.</param>
         /// <param name="value">The value of the configuration as a string.</param>
-        /// <exception cref="T:System.InvalidOperationException">
+        /// <exception cref="InvalidOperationException">
         /// <typeparamref name="T"/> can not be instantiated from a <see cref="string"/>.
         /// </exception>
-        /// <exception cref="T:System.ArgumentNullException">
+        /// <exception cref="ArgumentNullException">
         /// <paramref name="name"/> or <paramref name="value"/> is <c>null</c>.
         /// </exception>
-        /// <exception cref="T:System.ArgumentOutOfRangeException">
+        /// <exception cref="ArgumentOutOfRangeException">
         /// <paramref name="name"/> is white space.
         /// </exception>
-        /// <exception cref="T:System.FormatException">
-        /// 
+        /// <exception cref="ConfigurationValueFormatException">
+        /// <paramref name="value"/> can not be used to initialize an instance of <typeparamref name="T"/>.
         /// </exception>
         public Configuration(string name, string value)
         {
@@ -53,7 +54,8 @@ namespace wimm.Confoundry
                 throw new ArgumentOutOfRangeException(nameof(name),
                     "Must contain at least one non-whitespace character");
 
-            if (value == null) throw new ArgumentNullException(nameof(value));
+            if (value == null)
+                throw new ArgumentNullException(nameof(value));
 
             var errors = new List<Exception>();
 
@@ -70,34 +72,32 @@ namespace wimm.Confoundry
                 }
             }
 
-            throw new FormatException($"The value of {nameof(value)} could not be mapped to a {nameof(T)}",
-                new AggregateException(errors));
+            throw new ConfigurationValueFormatException(name, value, new AggregateException(errors));
         }
 
         private IList<Func<string, T>> GetMapFunctions() => new[] { StringConstructor(), ParseMethod() }
             .Where(m => m != Maybe<Func<string, T>>.None).Select(m => m.Value).ToList();
 
-        private Maybe<Func<string, T>> StringConstructor() =>
-            GetMapMethod(typeof(T).GetConstructor(new[] { typeof(string) }));
+        private Maybe<Func<string, T>> StringConstructor()
+        {
+            var constructor = typeof(T).GetConstructor(new[] { typeof(string) });
+            return constructor == null
+                ? Maybe<Func<string, T>>.None
+                : new Func<string, T>(s => (T)constructor.Invoke(new object[] { s }));
+        }
 
         private Maybe<Func<string, T>> ParseMethod()
         {
             var parseMethod = typeof(T).GetMethod("Parse", BindingFlags.Public | BindingFlags.Static, null,
                 new[] { typeof(string) }, null);
 
-            if (parseMethod != null && parseMethod.ReturnType != typeof(T))
+            if (parseMethod == null || parseMethod.ReturnType != typeof(T))
             {
-                parseMethod = null;
+                return Maybe<Func<string, T>>.None;
             }
 
-            return GetMapMethod(parseMethod);
+            return new Func<string, T>(s => (T)parseMethod.Invoke(null, new object[] { s }));
         }
-
-        private Maybe<Func<string, T>> GetMapMethod(MethodBase method) =>
-            method == null ? new Maybe<Func<string, T>>() : WrapMapMethod(method);
-
-        private Func<string, T> WrapMapMethod(MethodBase method) =>
-            new Func<string, T>(s => (T)method.Invoke(null, new object[] { s }));
     }
 }
 
