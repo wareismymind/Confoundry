@@ -1,7 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 
-namespace wimm.Confoundry
+namespace wimm.Confoundry.DontBelongs
 {
     internal struct Maybe<T> : IEquatable<Maybe<T>>
     {
