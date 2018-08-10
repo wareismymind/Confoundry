@@ -1,22 +1,21 @@
 using System;
 using Xunit;
 
-namespace wimm.Confoundry.UnitTests.Configuration
+namespace wimm.Confoundry.UnitTests
 {
-    public abstract class Configuration_Test<T>
+    public class ConfigurationTest
     {
-        private const string ValueName = "ConfigurationValue";
+        private const string _valueName = "Configuration Value";
 
-        protected abstract string ValueString { get; }
-
-        protected abstract T ExpectedValue { get; }
+        private const string _intValueString = "42";
+        private const int _intExpectedValue = 42;
 
         [Fact]
         public void Construct_NullName_Throws()
         {
             var ex = Assert.Throws<ArgumentNullException>(() =>
             {
-                var _ = new Configuration<T>(null, ValueString);
+                var _ = new Configuration<int>(null, _intValueString);
             });
 
             Assert.Equal("name", ex.ParamName);
@@ -32,7 +31,7 @@ namespace wimm.Confoundry.UnitTests.Configuration
         {
             var ex = Assert.Throws<ArgumentOutOfRangeException>(() =>
             {
-                var _ = new Configuration<T>(whitespace, ValueString);
+                var _ = new Configuration<int>(whitespace, _intValueString);
             });
 
             Assert.Equal("name", ex.ParamName);
@@ -43,7 +42,7 @@ namespace wimm.Confoundry.UnitTests.Configuration
         {
             var ex = Assert.Throws<ArgumentNullException>(() =>
             {
-                var _ = new Configuration<T>(ValueName, null);
+                var _ = new Configuration<int>(_valueName, null);
             });
 
             Assert.Equal("value", ex.ParamName);
