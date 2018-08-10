@@ -79,10 +79,6 @@ namespace wimm.Confoundry.UnitTests.Exceptions
             Assert.Equal(_value, actual);
         }
 
-
-
-
-
         [Fact]
         public void ConstructNameValueException_NullName_Throws()
         {
@@ -116,6 +112,15 @@ namespace wimm.Confoundry.UnitTests.Exceptions
         }
 
         [Fact]
+        public void ConstructNameValueException_NullException_Throws()
+        {
+            var ex = Assert.Throws<ArgumentNullException>(() =>
+            {
+                var _ = new ConfigurationValueFormatException(_name, _value, null);
+            });
+        }
+
+        [Fact]
         public void ConstructNameValueException_ValidArgs_Constructs()
         {
             var _ = new ConfigurationValueFormatException(_name, _value, _exception);
@@ -130,15 +135,6 @@ namespace wimm.Confoundry.UnitTests.Exceptions
         public void ConstructNameValueException_WhiteSpaceValue_Constructs(string whiteSpace)
         {
             var _ = new ConfigurationValueFormatException(_name, whiteSpace, _exception);
-        }
-
-        [Fact]
-        public void ConstructNameValueException_NullException_Throws()
-        {
-            var ex = Assert.Throws<ArgumentNullException>(() =>
-            {
-                var _ = new ConfigurationValueFormatException(_name, _value, null);
-            });
         }
 
         [Fact]
