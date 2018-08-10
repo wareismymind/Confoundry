@@ -39,11 +39,11 @@ namespace wimm.Confoundry.UnitTests
         [InlineData("\t")]
         [InlineData("\n")]
         [InlineData("\r\n")]
-        public void Construct_WhitespaceName_Throws(string whitespace)
+        public void Construct_WhiteSpaceName_Throws(string whiteSpace)
         {
             var ex = Assert.Throws<ArgumentOutOfRangeException>(() =>
             {
-                var _ = new Configuration<int>(whitespace, _intValueString);
+                var _ = new Configuration<int>(whiteSpace, _intValueString);
             });
 
             Assert.Equal("name", ex.ParamName);

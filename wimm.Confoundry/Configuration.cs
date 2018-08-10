@@ -34,7 +34,7 @@ namespace wimm.Confoundry
         /// <paramref name="name"/> or <paramref name="value"/> is <c>null</c>.
         /// </exception>
         /// <exception cref="T:System.ArgumentOutOfRangeException">
-        /// <paramref name="name"/> is whitespace.
+        /// <paramref name="name"/> is white space.
         /// </exception>
         /// <exception cref="T:System.FormatException">
         /// 
