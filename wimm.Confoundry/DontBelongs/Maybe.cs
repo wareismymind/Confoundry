@@ -43,5 +43,7 @@ namespace wimm.Confoundry.DontBelongs
         public static bool operator ==(Maybe<T> maybe1, Maybe<T> maybe2) => maybe1.Equals(maybe2);
 
         public static bool operator !=(Maybe<T> maybe1, Maybe<T> maybe2) => !(maybe1 == maybe2);
+
+        public static implicit operator Maybe<T>(T value) => new Maybe<T>(value);
     }
 }

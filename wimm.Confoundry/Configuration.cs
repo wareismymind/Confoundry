@@ -77,16 +77,27 @@ namespace wimm.Confoundry
         private IList<Func<string, T>> GetMapFunctions() => new[] { StringConstructor(), ParseMethod() }
             .Where(m => m != Maybe<Func<string, T>>.None).Select(m => m.Value).ToList();
 
-        private Maybe<Func<string, T>> StringConstructor() => 
-            GetMapMethod(typeof(T).GetConstructor(new[] {typeof(string)}));
+        private Maybe<Func<string, T>> StringConstructor() =>
+            GetMapMethod(typeof(T).GetConstructor(new[] { typeof(string) }));
 
-        private Maybe<Func<string, T>> ParseMethod() =>
-            GetMapMethod(typeof(T).GetMethod("Parse", new[] { typeof(string) }));
+        private Maybe<Func<string, T>> ParseMethod()
+        {
+            var parseMethod = typeof(T).GetMethod("Parse", BindingFlags.Public | BindingFlags.Static, null,
+                new[] { typeof(string) }, null);
+
+            if (parseMethod != null && parseMethod.ReturnType != typeof(T))
+            {
+                parseMethod = null;
+            }
+
+            return GetMapMethod(parseMethod);
+        }
 
         private Maybe<Func<string, T>> GetMapMethod(MethodBase method) =>
-            method == null
-                ? new Maybe<Func<string, T>>()
-                : new Maybe<Func<string, T>>(s => (T)method.Invoke(null, new object[] { s }));
+            method == null ? new Maybe<Func<string, T>>() : WrapMapMethod(method);
+
+        private Func<string, T> WrapMapMethod(MethodBase method) =>
+            new Func<string, T>(s => (T)method.Invoke(null, new object[] { s }));
     }
 }
 
